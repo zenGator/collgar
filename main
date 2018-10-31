@@ -1,0 +1,52 @@
+#command-line arguments
+  param (
+    [string]$server = "http://defaultserver",
+    [Parameter(Mandatory=$true)][string]$username,
+    [string]$password = $( Read-Host "Input password, please" )
+  )
+
+#history bits
+  for ($x=170;$x -le 175;$x++) { Invoke-History $x}
+
+#byte-ing
+  $bytes=[System.IO.File]::ReadAllBytes("C:\lab\River-flows-in-you-piano.mp3")
+  $hexString = ($bytes[0..16]|ForEach-Object ToString X2) -join ' '
+  $hexStringRev = ($bytes[16..0]|ForEach-Object ToString X2) -join ' '
+  $hexString=($bytes[$start..($start+$count-1)] | ForEach-Object tostring x2) -join ' '
+  $test=12
+  echo $($test -band $bytes[1]) #AND
+
+#read/write as a set of bytes:
+  $bytes = Get-Content $file -Encoding byte
+  [byte[]]$bytes = Get-Content $file -Encoding byte
+  [system.io.file]::WriteAllBytes('.\test.mp3', $bytes[0..2047])
+
+#create byte block:
+  [System.Byte[]]::CreateInstance([System.Byte],10)
+  $byte = [Byte[]] (,0xFF * 100)
+  $byte2=[Byte[]](0xFF,0xFE)
+
+#display binary:
+  [convert]::ToString(0xffe0,2).padleft(8,'0')
+  write-host ([convert]::ToString($val,2).padleft(8,'0')) "=>"  ([convert]::ToString($val,10))
+
+#match and work on a line in a file
+  foreach($line in Get-Content .\file.txt) {
+      if($line -match $regex){
+          # Work here
+      }
+  }
+
+#formatted strings
+  $outStr="@{0,10} (#{1,8})`t{2,8} value ({3,6}) is invalid; header: {4,12}`t=> {5}" -f $currentFrameHeadStart,($frameNumber + 1),"layer", $layer,[string]($possibleFrameHeader | ForEach-Object ToString X2) ,$layerStr
+  $outStr="{0,64} " -f [string]($b64dec | ForEach-Object ToString X2)
+  ($string | Format-Hex)
+
+#RegEx (@ CLI):
+  $x="----start----blahblahblah----end----"
+  $x -match "----start----(?<content>.*)----(?<stuff>.*)----"
+  True
+  $matches.count
+  $matches['content']
+  $matches['stuff']
+  $matches
