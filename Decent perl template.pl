@@ -39,10 +39,10 @@ use POSIX;
 # see usage() below for explanation of switches
 my $commandname=$0=~ s/^.*\///r;				#let's know our own name
 my %opt=();
-getopts('hi:o:', \%opt) or usage();
+getopts('dhi:l:o:', \%opt) or usage();				#typical options: debug, help, infile, outfile, logfile
 
-
-usage () if ( $opt{h} or (scalar keys %opt) == 0 ) ;
+my $debugging=TRUE if $opt{d};
+usage () if ( $opt{h} or (scalar keys %opt) == 0 ) ;		#show help if requesting or a bad flag is provided
 
 =begin method 
 #to ensure options needed for other options are provided do this (in this case, s requires o):
@@ -60,6 +60,7 @@ if ($opt{i}) {
 	open($inFH, '<:encoding(UTF-8)', $opt{i})
 	  or die "Could not open file '$opt{i}' $!";
 	}
+*STDIN=$inFH;
 
 my $outFH=*STDOUT;
 if ($opt{o}) {
@@ -78,11 +79,10 @@ if ($opt{l}) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #declare variables here
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
-my $x=0;  #primary counter, the line we are currently processing
-my $outFiCount=0;
+my $x=0;  		#primary counter, the line we are currently processing
 
-my $starttime= strftime ("%Y-%m-%d %H:%M:%S", gmtime time);
-printf $logFH "started at %s\n",$starttime;  #dbg
+my $starttime= strftime ("%Y.%m.%dT%H:%M:%SZ", gmtime time);	#provide for standard time
+printf $logFH "started at %s\n",$starttime if $debugging;  #dbg
 
 
 while (my $row = <$inFH>) {
@@ -113,9 +113,10 @@ while (my $row = <$inFH>) {
 exit 0;
 
 sub usage() {
-    print "like this: \n\t".$commandname." -i [infile] -o [outfile] [-l [logfile]] [-s]\n";
+    print "like this: \n\t".$commandname." -i [infile] -o [outfile] [-l [logfile]] [-s] [-d]\n";
     print "\nThis adjusts RegEx (as used in mwscan, possibly POSIX-compliant) into XWF-compatible RegEx/grep strings.  Because XWF has a limit of ".XWFLIM." characters for any set of simultaneous-search strings, if the output file reaches that limit, multiple output files are created by appending a digit (zero-indexed, of course) to the output file name.  Each will need to be run as a separate simultaneous search.\n";
-    print "\nThe -s switch will [s]plit the output into two [sets of] files:  one that works as simple string search terms and another that contains RegEx terms which will require the 'GREP syntax' option be selected in XWF.  You must identify an output file if using -s.\n";
+    print "\n-s\t[s]plit the output into two [sets of] files:  one that works as simple string search terms and another that contains RegEx terms which will require the 'GREP syntax' option be selected in XWF.  You must identify an output file if using -s.\n";
+    print "\n-d\tfor some [d]ebugging messages.";
     exit 1;
     }
 
