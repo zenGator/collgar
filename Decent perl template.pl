@@ -1,6 +1,6 @@
 #!/usr/bin/perl
-# https://github.com/zenGator/ [name]
-# zG:20221126
+# https://github.com/zenGator/[name]
+# zG:[2023xxxx]
 
 # other notes
 =for comment 
@@ -25,6 +25,7 @@ This is a second paragraph.  Note that the blank lines are part of the syntax an
 use strict;
 use warnings;
 use Getopt::Std;
+use POSIX;
 #use File::Copy;
 #use constant XWFLIM => 100000;
 
@@ -36,7 +37,7 @@ use Getopt::Std;
 
 # switches followed by a : expect an argument
 # see usage() below for explanation of switches
-my $commandname=$0=~ s/^.*\///r;
+my $commandname=$0=~ s/^.*\///r;				#let's know our own name
 my %opt=();
 getopts('hi:o:', \%opt) or usage();
 
@@ -44,38 +45,35 @@ getopts('hi:o:', \%opt) or usage();
 usage () if ( $opt{h} or (scalar keys %opt) == 0 ) ;
 
 =begin method 
-#ensure options needed for others are provided  (in this case, s requires o)
+#to ensure options needed for other options are provided do this (in this case, s requires o):
 if ( $opt{s} and ! $opt{o}) {
     print "ERROR ($commandname):  -o required when using -s.\n\n";
     usage();
     }
-
 =end method
 
 =cut
 
-
-my $infile=$opt{i};
-open(my $fh, '<:encoding(UTF-8)', $infile)
-  or die "Could not open file '$infile' $!";
+#allow for piping /dev/stdin|stdout|stderr or redirect if specified at command-line
+my $inFH=*STDIN;
+if ($opt{i}) {
+	open($inFH, '<:encoding(UTF-8)', $opt{i})
+	  or die "Could not open file '$opt{i}' $!";
+	}
 
 my $outFH=*STDOUT;
 if ($opt{o}) {
     open($outFH, '>:encoding(UTF-8)', $opt{o}) 
         or die "Could not open file '$opt{o}': $!\n";
     }
+*STDOUT=$outFH;
 
-=begin method
-my $logfile=*STDERR;
+my $logFH=*STDERR;
 if ($opt{l}) {
-    open($logfile, '>:encoding(UTF-8)', $opt{l}) 
+    open($logFH, '>:encoding(UTF-8)', $opt{l}) 
         or die "Could not open file '$opt{l}': $!\n";
     }
-*STDERR=$logfile;
-
-=end method
-
-=cut
+*STDERR=$logFH;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #declare variables here
@@ -83,8 +81,11 @@ if ($opt{l}) {
 my $x=0;  #primary counter, the line we are currently processing
 my $outFiCount=0;
 
+my $starttime= strftime ("%Y-%m-%d %H:%M:%S", gmtime time);
+printf $logFH "started at %s\n",$starttime;  #dbg
 
-while (my $row = <$fh>) {
+
+while (my $row = <$inFH>) {
     #get a line
     $x++;  # increment line counter
     $regEx=0;
@@ -109,7 +110,7 @@ while (my $row = <$fh>) {
         printf $outFH "%s\r\n", $row;
         }
     
-}
+exit 0;
 
 sub usage() {
     print "like this: \n\t".$commandname." -i [infile] -o [outfile] [-l [logfile]] [-s]\n";
