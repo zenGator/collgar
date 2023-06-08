@@ -1,3 +1,5 @@
+#PoSh
+
 #command-line arguments
   param (
     [string]$server = "http://defaultserver",
