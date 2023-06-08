@@ -54,6 +54,12 @@ if ( $opt{s} and ! $opt{o}) {
 
 =cut
 
+#show positional parameters (anything after flagged options
+for my $i (0 .. $#ARGV) {
+  printf "%d: \t%s\n", $i,$ARGV[$i];
+}
+
+
 #allow for piping /dev/stdin|stdout|stderr or redirect if specified at command-line
 my $inFH=*STDIN;
 if ($opt{i}) {
